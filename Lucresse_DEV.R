@@ -29,8 +29,32 @@ typeOfVar <- sapply(crimeDS, function(col) {
     return("Other")
   }
 })
-variable_summary <- data.frame(Variable = names(typeOfVar), Type = typeOfVar)
+#create a data frame with the summary
+variable_summary <- data.frame(Var = names(typeOfVar), Typeofvar = typeOfVar)
+#pritning the summary
 print(variable_summary)
+str(variable_summary)
+
+
+
+#==============================================================================
+#visualization of the variable type with a heatmap
+install.packages("pheatmap")
+library(pheatmap)
+
+# Create a matrix for the heatmap
+heatmapOfVar <- table(variable_summary$Var, variable_summary$Typeofvar) 
+# Create the heatmap
+pheatmap(heatmapOfVar,
+         color = c("lightyellow", "green"),
+         main = "Variable Types ",
+         display_numbers = FALSE,
+         cluster_cols = FALSE,
+         fontsize_col = 12,
+         fontsize = 8)
+
+
+
 #=========================================================================================================
 #data cleaning
 
@@ -130,10 +154,6 @@ print(reporting_area_sd)
 
 
 
-
-
-
-
 # ================================================================================================
 #min and max normalization
 # required libraries
@@ -174,15 +194,15 @@ print(crimeDS_zscore)
 
 
 #========================================================================
-#Data visualization
+#Data visualization and correlation between the features of the dataset
 library(ggplot2)
 ggplot(crimeDS_Clean, aes(x = YEAR)) +
   geom_density(fill = "blue", color = "black") +
-  labs(title = "Kernel Density Plot of Crime Incidents by Year")
+  labs(title = " Crime Incidents by Year")
 
 ggplot(crimeDS_Clean, aes(x = 1, y = MONTH)) +
   geom_boxplot(fill = "yellow") +
-  labs(title = "Boxplot of Crime Incidents by Reporting Area")
+  labs(title = "Crime Incidents by Month")
 
 ggplot(crimeDS_Clean, aes(x = REPORTING_AREA)) +
   geom_histogram(binwidth = 1, fill = "black", color = "purple") +
@@ -200,3 +220,57 @@ ggplot(agg_data, aes(x = DAY_OF_WEEK, y = Total_Hours)) +
   geom_bar(stat = "identity", fill= "blue") +
   labs(title = "Total Sum of Hours Per Day", x = "Day of Week", y = "Total Hours") +
   theme_minimal()
+
+
+#creating the plot that show the area with positif shooting
+# subset for the scatter plot that takes in consideration the positif shooting
+crimeDS_Subset <- crimeDS_Clean[crimeDS_Clean$SHOOTING == "Y", c("REPORTING_AREA", "SHOOTING")]
+# Creating a scatter plot
+ggplot(crimeDS_Subset, aes(x = REPORTING_AREA, y=2, size= 15)) +
+  geom_point(shape= 21,fill = "lightpink") +
+  labs(title = "Shooting in Various Reporting Areas",
+       x = "Reporting Area",
+       y = ""
+       )
+
+
+#creation of a pie chart to show what are the most commun offense description
+#we start by creating a data frame that counts the number of each offense
+library(dplyr)
+offense_DS <- crimeDS_Clean %>%
+  group_by(OFFENSE_CODE_GROUP) %>%
+  summarise(count = n()) %>%
+  mutate(percentage = count / sum(count) * 100)
+#we create a pie chart
+ggplot(offense_DS, aes(x = "", y = percentage, fill = OFFENSE_CODE_GROUP)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar(theta = "y") +
+  theme_void() +
+  scale_fill_discrete(labels = paste(offense_DS$OFFENSE_CODE_GROUP, sprintf("%.1f%%", offense_DS$percentage)))
+  labs(title = "Distribution of OFFENSES per percentage")
+  
+  
+#lets create a line plot to show the corrolation between the offense code and the the area this offense where reported during the years
+ggplot(crimeDS_Clean, aes(x = YEAR, y = OFFENSE_CODE, group = REPORTING_AREA, color = REPORTING_AREA)) +
+  geom_point() +
+  labs(title = "OFFENSE_CODE REPORTED IN AREA in the years",
+       x = "YEAR",
+       y = "OFFENSE_CODE")
+  
+
+
+
+#================================================================================================
+install.packages("caret")
+library(caret)
+#lets apply dummy encoding to our categorical variable
+#we choose the variable that we want to encode
+encoded_Data <- crimeDS_Clean$DAY_OF_WEEK
+#to check the dta
+encoded_Data
+#we create a dummy variable usint the dummy vars from the caret library
+dummy_Inf <- dummyVars("~ .",data = data.frame(DAY_OF_WEEK = encoded_Data) )
+#we apply the encoding
+dummy_Inf <- predict(dummy_Inf, newdata = crimeDS_Clean)
+dummy_Inf
+
