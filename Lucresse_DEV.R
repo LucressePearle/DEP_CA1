@@ -15,8 +15,22 @@ column_names <- names(crimeDS)
 print(column_names)
 
 #========================================================================================================
-
-
+#variable category
+typeOfVar <- sapply(crimeDS, function(col) {
+  if (is.factor(col) | is.character(col)) {
+    return("Categorical")
+  } else if (is.numeric(col)) {
+    if (length(unique(col)) < 20) {
+      return("Discrete")
+    } else {
+      return("Continuous")
+    }
+  } else {
+    return("Other")
+  }
+})
+variable_summary <- data.frame(Variable = names(typeOfVar), Type = typeOfVar)
+print(variable_summary)
 #=========================================================================================================
 #data cleaning
 
