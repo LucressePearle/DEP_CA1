@@ -209,6 +209,17 @@ ggplot(crimeDS_Clean, aes(x = REPORTING_AREA)) +
   labs(title = "Distribution of Crime Incidents by Reporting Area")
 
 
+#CREATING A boxplot to show the distribution og the shooting in reported area
+ggplot(crimeDS_Clean, aes(x=SHOOTING, y=REPORTING_AREA)) + 
+  geom_boxplot(fill="green")+
+  labs(title = "Shouting in  Reporting Area")
+
+#this a plot that show the repartition of the shooting HOURS across the year
+positif_shooting <- subset(crimeDS_Clean, SHOOTING =="Y")
+ggplot(positif_shooting, aes(x=YEAR, y=HOUR)) + 
+  geom_point(size = 4 , color ="purple")+
+  labs(title = "The correlation of shouting hours in  the years")
+
 # Convert DAY_OF_WEEK to a factor with a specific order
 crimeDS_Clean$DAY_OF_WEEK <- factor(crimeDS_Clean$DAY_OF_WEEK)
 # Aggregate the data to get the total sum of hours for each day
