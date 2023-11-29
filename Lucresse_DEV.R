@@ -53,8 +53,6 @@ pheatmap(heatmapOfVar,
          fontsize_col = 12,
          fontsize = 8)
 
-
-
 #=========================================================================================================
 #data cleaning
 
@@ -83,8 +81,8 @@ missing_val <- is.na(crimeDS_Clean)
 summary(missing_val)
 
 #Replacing the NAS in the reporting_area column by the mean
-reporting_area_median <- median(crimeDS_Clean$REPORTING_AREA, na.rm = TRUE)
-crimeDS_Clean$REPORTING_AREA[is.na(crimeDS_Clean$REPORTING_AREA)] <- reporting_area_median
+reporting_area_mean <- mean(crimeDS_Clean$REPORTING_AREA, na.rm = TRUE)
+crimeDS_Clean$REPORTING_AREA[is.na(crimeDS_Clean$REPORTING_AREA)] <- reporting_area_mean
 colSums(is.na(crimeDS_Clean))
 head(crimeDS_Clean)
 
@@ -284,4 +282,29 @@ dummy_Inf <- dummyVars("~ .",data = data.frame(DAY_OF_WEEK = encoded_Data) )
 #we apply the encoding
 dummy_Inf <- predict(dummy_Inf, newdata = crimeDS_Clean)
 dummy_Inf
+
+
+
+#==============================================================================================================================
+#lets determine the PCA 
+install.packages("FactoMineR")
+library(FactoMineR)
+# we create a new datset with just nemerical varaible 
+numerical_variable <- crimeDS_Clean %>%
+  select_if(is.numeric)
+#we check the dataset
+str(numerical_variable)
+# wwe normalize the data
+norm <- scale(numerical_variable)
+#we check the norm
+norm
+#We aPply the PCA
+PCA_SUM <- PCA(norm, graph = TRUE)
+# we plot the PCA 
+biplot(PCA,  main = "Principal Components Analisys for Students",choices = c(1,5))
+
+
+
+
+
 
