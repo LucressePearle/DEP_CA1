@@ -74,7 +74,7 @@ crimeDS2 <-crimeDS
 print(crimeDS2)
 
 # Remove specified columns
-crimeDS_Clean <- crimeDS2[, !(names(crimeDS) %in% c("Lat", "Long", "Location","UCR_PART","STREET"))]
+crimeDS_Clean <- crimeDS2[, !(names(crimeDS2) %in% c("Lat", "Long", "Location","UCR_PART","STREET"))]
 
 #check all the empty values for the variables
 missing_val <- is.na(crimeDS_Clean)
@@ -289,6 +289,7 @@ dummy_Inf
 #lets determine the PCA 
 install.packages("FactoMineR")
 library(FactoMineR)
+library(dplyr)
 # we create a new datset with just nemerical varaible 
 numerical_variable <- crimeDS_Clean %>%
   select_if(is.numeric)
@@ -298,11 +299,13 @@ str(numerical_variable)
 norm <- scale(numerical_variable)
 #we check the norm
 norm
-#We aPply the PCA
-PCA_SUM <- PCA(norm, graph = TRUE)
-# we plot the PCA 
-biplot(PCA,  main = "Principal Components Analisys for Students",choices = c(1,5))
-
+pca1<- princomp(norm)
+summary(pca1)
+# screeplot to visualise the variance
+screeplot(pca1, type = "bar")
+# we biplot to visualise
+biplot(pca1, choices = c(1, 5), scale = 0)
+ 
 
 
 
